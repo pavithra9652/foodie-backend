@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+
 import authRoutes from './routes/auth.js';
 import menuRoutes from './routes/menu.js';
 import cartRoutes from './routes/cart.js';
@@ -10,9 +11,6 @@ import adminRoutes from './routes/admin.js';
 import { initializeCategories } from './utils/initializeCategories.js';
 
 dotenv.config();
-
-// Check for Razorpay configuration (warning only, server can run without it)
-
 
 const app = express();
 
@@ -33,23 +31,28 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Foodie API is running' });
 });
 
-// MongoDB Connection
+// ✅ MongoDB Connection (FIXED)
 const connectDB = async () => {
+  try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
-    mongoose.connect(process.env.MONGODB_URI);
+
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
-    // Initialize categories in database after connection
+
+    // Initialize categories once DB is ready
     await initializeCategories();
+
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error("MongoDB connection failed:", error.message);
     process.exit(1);
   }
 };
 
 connectDB();
 
-const PORT = process.env.PORT || 5000;
+// ✅ Server start
+const PORT = process.env.PORT || 10000;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
